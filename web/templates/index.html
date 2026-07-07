@@ -10,14 +10,32 @@
 :root{
   --bg:#0f1f28;--panel:#162d38;--panel2:#1c3a47;--line:#27506322;
   --ink:#deeef4;--dim:#7da8b8;--cyan:#28c5d6;--amber:#f5a623;--red:#ef5350;--green:#3ddc97;
+  --side-w:290px;
 }
 *{box-sizing:border-box;margin:0}
 html,body{height:100%;font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--ink);overflow:hidden}
 #app{display:flex;height:100%}
 
-/* ── 側欄 ── */
-#side{width:290px;min-width:290px;background:var(--panel);display:flex;flex-direction:column;
-  border-right:1px solid #0a151c;z-index:1000;box-shadow:2px 0 14px #0008}
+/* ── 側欄收合 ── */
+#side{
+  width:var(--side-w);background:var(--panel);display:flex;flex-direction:column;
+  border-right:1px solid #0a151c;z-index:1000;box-shadow:2px 0 14px #0008;
+  transition:transform .22s cubic-bezier(.4,0,.2,1);
+  position:relative;flex-shrink:0;
+}
+#side.collapsed{transform:translateX(calc(-1 * var(--side-w)));margin-right:calc(-1 * var(--side-w))}
+
+/* 收合按鈕 */
+#toggleBtn{
+  position:absolute;top:50%;right:-15px;transform:translateY(-50%);
+  width:15px;height:48px;background:var(--panel);border:1px solid #1e4a5c;
+  border-left:none;border-radius:0 8px 8px 0;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;z-index:1001;
+  color:var(--dim);font-size:10px;transition:.22s;
+}
+#toggleBtn:hover{background:var(--panel2);color:var(--cyan)}
+#side.collapsed #toggleBtn{right:-15px}
+
 #logo{padding:14px 16px 10px;border-bottom:1px solid #0a151c}
 #logo h1{font-size:15px;font-weight:700;line-height:1.3}
 #logo .sub{font:11px 'IBM Plex Mono',monospace;color:var(--cyan);margin-top:3px}
@@ -42,12 +60,6 @@ html,body{height:100%;font-family:'Noto Sans TC',sans-serif;background:var(--bg)
 .lrow:hover{background:#ffffff07}
 .lrow input[type=checkbox]{accent-color:var(--cyan);width:13px;height:13px;cursor:pointer}
 .ldot{width:11px;height:11px;border-radius:50%;flex:none;border:1.5px solid #10333c}
-.ldot.cross{border-radius:0;background:transparent!important;
-  border:none;position:relative;width:13px;height:13px}
-.ldot.cross::before,.ldot.cross::after{content:'';position:absolute;top:50%;left:0;
-  width:100%;height:2px;transform-origin:center}
-.ldot.cross::before{transform:translateY(-50%) rotate(45deg)}
-.ldot.cross::after{transform:translateY(-50%) rotate(-45deg)}
 .lrow .lname{flex:1;font-size:12px}
 .lrow .lcnt{font:11px 'IBM Plex Mono',monospace;color:var(--dim)}
 .lrow select{background:var(--panel2);color:var(--dim);border:1px solid #2b5365;
@@ -64,7 +76,7 @@ html,body{height:100%;font-family:'Noto Sans TC',sans-serif;background:var(--bg)
 .syncbar .btn{padding:4px 8px;font-size:11px}
 
 /* ── 地圖 ── */
-#mapwrap{flex:1;position:relative}
+#mapwrap{flex:1;position:relative;min-width:0}
 #map{position:absolute;inset:0}
 #statusbar{position:absolute;left:0;right:0;bottom:0;height:24px;z-index:900;
   background:#0f1f28cc;backdrop-filter:blur(4px);display:flex;align-items:center;gap:16px;
@@ -74,26 +86,69 @@ html,body{height:100%;font-family:'Noto Sans TC',sans-serif;background:var(--bg)
 #bmbar .btn{background:#162d38e8;box-shadow:0 2px 8px #0007}
 
 /* ── 資訊面板 ── */
-#info{position:absolute;top:0;right:-350px;width:340px;bottom:24px;z-index:950;
-  background:#162d38f2;backdrop-filter:blur(6px);border-left:1px solid #0a151c;
-  transition:right .2s;display:flex;flex-direction:column}
+#info{
+  position:absolute;top:0;right:-380px;width:370px;bottom:24px;z-index:950;
+  background:#162d38f4;backdrop-filter:blur(8px);border-left:1px solid #0a151c;
+  transition:right .22s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;
+}
 #info.open{right:0}
-#info .ihead{display:flex;align-items:flex-start;padding:13px 14px 10px;
-  border-bottom:1px solid #0a151c;gap:10px}
-#info .ihead .pt{font:700 17px 'IBM Plex Mono',monospace;color:var(--amber);flex:1;line-height:1.2}
-#info .ihead .sys{font-size:10px;background:#f5a62322;color:var(--amber);padding:2px 7px;
-  border-radius:10px;margin-top:2px;display:inline-block}
-#info .ihead .x{cursor:pointer;color:var(--dim);font-size:17px;padding:2px 4px;margin-top:-2px}
+#info .ihead{
+  display:flex;align-items:flex-start;padding:14px 14px 10px;
+  border-bottom:1px solid #0a151c;gap:10px;
+}
+#info .ihead .pt{font:700 18px 'IBM Plex Mono',monospace;color:var(--amber);flex:1;line-height:1.2}
+#info .ihead .sys{
+  font-size:10px;background:#f5a62322;color:var(--amber);padding:2px 8px;
+  border-radius:10px;margin-top:3px;display:inline-block;letter-spacing:.05em;
+}
+#info .ihead .x{
+  cursor:pointer;color:var(--dim);font-size:18px;padding:2px 5px;margin-top:-2px;
+  border-radius:4px;transition:.15s;
+}
+#info .ihead .x:hover{background:#ffffff14;color:var(--ink)}
 #info .ibody{flex:1;overflow-y:auto;padding:10px 14px}
-.frow{display:flex;padding:5px 0;border-bottom:1px solid var(--line);font-size:12.5px;gap:8px}
-.frow .k{width:70px;color:var(--dim);flex:none;font-size:12px}
-.frow .v{flex:1;font-family:'IBM Plex Mono',monospace;font-size:12px;word-break:break-all}
-.null{color:#456272;font-style:italic}
-.imgs{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin:10px 0}
-.imgs a img{width:100%;height:90px;object-fit:cover;border-radius:6px;
-  border:1px solid #2b5365;display:block;background:#0a151c}
-.ilayer{font-size:11px;color:var(--dim);margin-top:10px;padding-top:8px;
-  border-top:1px solid var(--line)}
+.frow{display:flex;padding:6px 0;border-bottom:1px solid var(--line);font-size:12.5px;gap:8px}
+.frow .k{width:72px;color:var(--dim);flex:none;font-size:12px;padding-top:1px}
+.frow .v{flex:1;font-family:'IBM Plex Mono',monospace;font-size:12px;word-break:break-all;line-height:1.5}
+.null{color:#3d5f6e;font-style:italic}
+
+/* ── 照片區 ── */
+.photo-section{margin:12px 0 6px}
+.photo-label{font-size:11px;letter-spacing:.15em;color:var(--dim);font-weight:600;margin-bottom:8px}
+.photo-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.photo-item{position:relative;border-radius:8px;overflow:hidden;background:#0a151c;
+  border:1px solid #2b5365;cursor:pointer;transition:.2s}
+.photo-item:hover{border-color:var(--amber);transform:scale(1.02)}
+.photo-item img{width:100%;height:110px;object-fit:cover;display:block}
+.photo-item .ph-no{
+  position:absolute;bottom:0;left:0;right:0;padding:4px 7px;
+  background:linear-gradient(transparent,#0a151ccc);
+  font:500 10px 'IBM Plex Mono',monospace;color:#cde8f0;
+}
+.no-photo{
+  padding:16px;text-align:center;font-size:12px;color:var(--dim);
+  background:#0a151c44;border-radius:8px;border:1px dashed #2b5365;
+}
+
+/* 燈箱 */
+#lightbox{
+  display:none;position:fixed;inset:0;background:#000c;z-index:3000;
+  align-items:center;justify-content:center;
+}
+#lightbox.open{display:flex}
+#lightbox img{max-width:92vw;max-height:88vh;border-radius:10px;box-shadow:0 8px 40px #000a}
+#lightbox .lb-x{
+  position:absolute;top:16px;right:20px;font-size:28px;color:#fff;cursor:pointer;
+  line-height:1;opacity:.8;transition:.15s;
+}
+#lightbox .lb-x:hover{opacity:1}
+#lightbox .lb-info{
+  position:absolute;bottom:20px;left:50%;transform:translateX(-50%);
+  font:12px 'IBM Plex Mono',monospace;color:#cde8f0;background:#0a151ccc;
+  padding:5px 14px;border-radius:16px;
+}
+
+.ilayer{font-size:11px;color:var(--dim);margin-top:12px;padding-top:8px;border-top:1px solid var(--line)}
 
 /* toast */
 #toast{position:fixed;bottom:38px;left:50%;transform:translateX(-50%);z-index:2000;
@@ -108,8 +163,12 @@ html,body{height:100%;font-family:'Noto Sans TC',sans-serif;background:var(--bg)
 </head>
 <body>
 <div id="app">
+
   <!-- ═══ 左側欄 ═══ -->
   <aside id="side">
+    <!-- 收合按鈕 -->
+    <div id="toggleBtn" onclick="toggleSide()" title="收合/展開側欄">◀</div>
+
     <div id="logo">
       <h1>控制點查詢系統</h1>
       <div class="sub">CONTROL POINT VIEWER · QGIS SYNC</div>
@@ -174,35 +233,44 @@ html,body{height:100%;font-family:'Noto Sans TC',sans-serif;background:var(--bg)
     </div>
   </div>
 </div>
+
+<!-- 照片燈箱 -->
+<div id="lightbox" onclick="closeLb()">
+  <span class="lb-x" onclick="closeLb()">✕</span>
+  <img id="lbImg" src="" alt="">
+  <div class="lb-info" id="lbInfo"></div>
+</div>
+
 <div id="toast"></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script>
-/* ═══════════════════════════════════════════════════════════
-   設定:圖層顯示設定(配色 / 縮放門檻 / 是否預設開啟)
-   圖層名稱 KEY 必須與後端 cfg["label"] 一致
-═══════════════════════════════════════════════════════════ */
-const LAYER_CFG = {
-  "67圖根(全)":  {color:"#28c5d6", minZ:13, on:true,  group:"67系統(TWD67)"},
-  "67補點":      {color:"#ffe066", minZ:14, on:true,  group:"67系統(TWD67)"},
-  "都發局67圖根":{color:"#9b7cff", minZ:15, on:false, group:"67系統(TWD67)"},
-  "97圖根":      {color:"#f5a623", minZ:13, on:true,  group:"97系統(TWD97)"},
-  "安定區97":    {color:"#3ddc97", minZ:14, on:true,  group:"97系統(TWD97)"},
-};
+/* ═══ 側欄收合 ═══ */
+let sideOpen = true;
+function toggleSide(){
+  sideOpen = !sideOpen;
+  const side = document.getElementById('side');
+  const btn  = document.getElementById('toggleBtn');
+  side.classList.toggle('collapsed', !sideOpen);
+  btn.textContent = sideOpen ? '◀' : '▶';
+  setTimeout(()=>map.invalidateSize(), 240);
+}
 
+/* ═══ 圖層設定 ═══ */
+const LAYER_CFG = {
+  "67圖根(全)": {color:"#28c5d6", minZ:13, on:true,  group:"67系統(TWD67)"},
+  "67補點":     {color:"#ffe066", minZ:14, on:true,  group:"67系統(TWD67)"},
+  "都發局67圖根":{color:"#9b7cff",minZ:15, on:false, group:"67系統(TWD67)"},
+  "97圖根":     {color:"#f5a623", minZ:13, on:true,  group:"97系統(TWD97)"},
+  "安定區97":   {color:"#3ddc97", minZ:14, on:true,  group:"97系統(TWD97)"},
+};
 const TYPE_COLOR = {
   "鋼釘":"#28c5d6","道釘":"#3ddc97","鋼標":"#f5a623","水泥樁":"#b07ef7",
   "標註點":"#9db8c2","待確認":"#ffe066","滅失":"#ef5350","":""
 };
-const TYPE_MINZ = {
-  "鋼標":11,"水泥樁":11,"鋼釘":15,"道釘":16,
-  "標註點":16,"待確認":16,"滅失":17,"":15,
-};
-// 每個樁類的 on/off 與自訂 minZ
+const TYPE_MINZ = {"鋼標":11,"水泥樁":11,"鋼釘":15,"道釘":16,"標註點":16,"待確認":16,"滅失":17,"":15};
 const TYPE_VISIBLE = {};
-Object.keys(TYPE_COLOR).forEach(t=>{
-  TYPE_VISIBLE[t]={on: t!=="滅失", minZ: TYPE_MINZ[t]||15};
-});
+Object.keys(TYPE_COLOR).forEach(t=>{ TYPE_VISIBLE[t]={on:t!=="滅失",minZ:TYPE_MINZ[t]||15}; });
 
 /* ═══ 地圖 ═══ */
 const map = L.map("map",{zoomControl:true,preferCanvas:true}).setView([23.07,120.20],13);
@@ -229,26 +297,18 @@ function typeColor(p){
   return TYPE_COLOR[p.TYPE] || (lcfg ? lcfg.color : "#ccc");
 }
 function isVisible(p){
-  const lc = LAYER_CFG[p["圖層"]];
-  if(!lc || !lc.on) return false;
-  const tc = TYPE_VISIBLE[p.TYPE] || TYPE_VISIBLE[""];
-  if(!tc.on) return false;
-  const z = map.getZoom();
-  return z >= Math.max(lc.minZ, tc.minZ);
+  const lc = LAYER_CFG[p["圖層"]]; if(!lc||!lc.on) return false;
+  const tc = TYPE_VISIBLE[p.TYPE]||TYPE_VISIBLE[""];   if(!tc.on) return false;
+  return map.getZoom() >= Math.max(lc.minZ, tc.minZ);
 }
-
 function refresh(){
-  const b = map.getBounds().pad(0.25);
-  grp.clearLayers(); MARKERS={};
-  let shown=0;
+  const b=map.getBounds().pad(0.25); grp.clearLayers(); MARKERS={}; let shown=0;
   for(const p of POINTS){
-    if(!isVisible(p)) continue;
-    if(!b.contains([p.lat,p.lng])) continue;
-    const c = typeColor(p);
-    const lost = p.TYPE==="滅失";
-    const m = L.circleMarker([p.lat,p.lng],{
-      radius:5.5, weight:lost?2.2:1.5,
-      color: lost?c:"#0a1e28", fillColor:c, fillOpacity:lost?0:0.92,
+    if(!isVisible(p)||!b.contains([p.lat,p.lng])) continue;
+    const c=typeColor(p), lost=p.TYPE==="滅失";
+    const m=L.circleMarker([p.lat,p.lng],{
+      radius:5.5,weight:lost?2.2:1.5,
+      color:lost?c:"#0a1e28",fillColor:c,fillOpacity:lost?0:0.92
     });
     m.bindTooltip(p.NO,{direction:"top",offset:[0,-7],className:"pttip"});
     m.on("click",()=>openInfo(p.id));
@@ -264,10 +324,10 @@ map.on("mousemove",e=>document.getElementById("stXY").textContent=
   `${e.latlng.lat.toFixed(6)}, ${e.latlng.lng.toFixed(6)}`);
 
 async function load(){
-  POINTS = await (await fetch("/api/points")).json();
-  if(!fitted && POINTS.length){
+  POINTS=await(await fetch("/api/points")).json();
+  if(!fitted&&POINTS.length){
     fitted=true;
-    const la=POINTS.map(p=>p.lat), ln=POINTS.map(p=>p.lng);
+    const la=POINTS.map(p=>p.lat),ln=POINTS.map(p=>p.lng);
     map.fitBounds([[Math.min(...la),Math.min(...ln)],[Math.max(...la),Math.max(...ln)]],{padding:[28,28]});
   }
   refresh();
@@ -275,96 +335,98 @@ async function load(){
 
 /* ═══ 圖層清單 ═══ */
 function renderLayerList(){
-  const z=map.getZoom(), el=document.getElementById("llist");
-  // 統計各圖層樁類數量
+  const z=map.getZoom(),el=document.getElementById("llist");
   const cnt={};
-  POINTS.forEach(p=>{
-    const key=p["圖層"]+"|"+p.TYPE;
-    cnt[key]=(cnt[key]||0)+1;
-  });
-  // 依 group 分組
+  POINTS.forEach(p=>{ const k=p["圖層"]+"|"+p.TYPE; cnt[k]=(cnt[k]||0)+1; });
   const groups={};
-  Object.entries(LAYER_CFG).forEach(([lname,lc])=>{
-    if(!groups[lc.group]) groups[lc.group]=[];
-    groups[lc.group].push([lname,lc]);
-  });
+  Object.entries(LAYER_CFG).forEach(([n,c])=>{ if(!groups[c.group]) groups[c.group]=[]; groups[c.group].push([n,c]); });
   let html="";
-  for(const [grpName, layers] of Object.entries(groups)){
-    html+=`<div class="lsection">${grpName}</div>`;
-    // 圖層列
-    for(const [lname,lc] of layers){
-      const active=lc.on && z>=lc.minZ;
-      const lCount = POINTS.filter(p=>p["圖層"]===lname).length;
-      html+=`<div class="lrow${active?"":active===false&&lc.on?" dimmed":""}">
-        <input type="checkbox" ${lc.on?"checked":""} onchange="toggleLayer('${lname}',this.checked)">
+  for(const [gn,layers] of Object.entries(groups)){
+    html+=`<div class="lsection">${gn}</div>`;
+    for(const [ln,lc] of layers){
+      const lCnt=POINTS.filter(p=>p["圖層"]===ln).length;
+      const act=lc.on&&z>=lc.minZ;
+      html+=`<div class="lrow${act?"":lc.on?" dimmed":""}">
+        <input type="checkbox" ${lc.on?"checked":""} onchange="toggleLayer('${ln}',this.checked)">
         <span class="ldot" style="background:${lc.color}"></span>
-        <span class="lname" style="font-weight:600">${lname}</span>
-        <span class="lcnt">${lCount}</span>
+        <span class="lname" style="font-weight:600">${ln}</span>
+        <span class="lcnt">${lCnt}</span>
         <span class="ztag">z≥</span>
-        <select onchange="setLayerZ('${lname}',+this.value)" title="圖層顯示縮放門檻">
+        <select onchange="setLayerZ('${ln}',+this.value)">
           ${[11,12,13,14,15,16].map(v=>`<option ${v===lc.minZ?"selected":""}>${v}</option>`).join("")}
-        </select>
-      </div>`;
-      // 樁類子列
-      for(const [tname,tc] of Object.entries(TYPE_VISIBLE)){
-        if(!tname) continue;
-        const c2=cnt[lname+"|"+tname]; if(!c2) continue;
-        const lost=tname==="滅失";
-        const tActive=lc.on && tc.on && z>=Math.max(lc.minZ,tc.minZ);
-        const dotStyle=lost
-          ? `style="position:relative;width:11px;height:11px"` 
-          : `class="ldot" style="background:${TYPE_COLOR[tname]||lc.color};width:9px;height:9px"`;
-        const dotInner=lost
-          ? `<svg width="11" height="11" viewBox="0 0 11 11"><line x1="1" y1="1" x2="10" y2="10" stroke="${TYPE_COLOR.滅失}" stroke-width="2"/><line x1="10" y1="1" x2="1" y2="10" stroke="${TYPE_COLOR.滅失}" stroke-width="2"/></svg>`
-          : "";
-        html+=`<div class="lrow${tActive?"":lc.on&&tc.on?" dimmed":""}" style="padding-left:26px">
-          <input type="checkbox" ${tc.on?"checked":""} onchange="toggleType('${tname}',this.checked)">
-          <span ${dotStyle}>${dotInner}</span>
-          <span class="lname" style="color:var(--dim)">${tname}</span>
+        </select></div>`;
+      for(const [tn,tc] of Object.entries(TYPE_VISIBLE)){
+        if(!tn) continue;
+        const c2=cnt[ln+"|"+tn]; if(!c2) continue;
+        const lost=tn==="滅失";
+        const tAct=lc.on&&tc.on&&z>=Math.max(lc.minZ,tc.minZ);
+        const dot=lost
+          ? `<svg width="11" height="11" viewBox="0 0 11 11"><line x1="1" y1="1" x2="10" y2="10" stroke="${TYPE_COLOR["滅失"]}" stroke-width="2"/><line x1="10" y1="1" x2="1" y2="10" stroke="${TYPE_COLOR["滅失"]}" stroke-width="2"/></svg>`
+          : `<span class="ldot" style="background:${TYPE_COLOR[tn]||lc.color};width:9px;height:9px"></span>`;
+        html+=`<div class="lrow${tAct?"":lc.on&&tc.on?" dimmed":""}" style="padding-left:26px">
+          <input type="checkbox" ${tc.on?"checked":""} onchange="toggleType('${tn}',this.checked)">
+          ${dot}
+          <span class="lname" style="color:var(--dim)">${tn}</span>
           <span class="lcnt">${c2}</span>
           <span class="ztag">z≥</span>
-          <select onchange="setTypeZ('${tname}',+this.value)" title="樁類顯示縮放門檻">
+          <select onchange="setTypeZ('${tn}',+this.value)">
             ${[11,12,13,14,15,16,17].map(v=>`<option ${v===tc.minZ?"selected":""}>${v}</option>`).join("")}
-          </select>
-        </div>`;
+          </select></div>`;
       }
     }
   }
   el.innerHTML=html;
 }
-function toggleLayer(n,v){ LAYER_CFG[n].on=v; refresh(); }
-function setLayerZ(n,v){ LAYER_CFG[n].minZ=v; refresh(); }
-function toggleType(n,v){ if(TYPE_VISIBLE[n]) TYPE_VISIBLE[n].on=v; refresh(); }
-function setTypeZ(n,v){ if(TYPE_VISIBLE[n]) TYPE_VISIBLE[n].minZ=v; refresh(); }
+function toggleLayer(n,v){LAYER_CFG[n].on=v;refresh();}
+function setLayerZ(n,v){LAYER_CFG[n].minZ=v;refresh();}
+function toggleType(n,v){if(TYPE_VISIBLE[n])TYPE_VISIBLE[n].on=v;refresh();}
+function setTypeZ(n,v){if(TYPE_VISIBLE[n])TYPE_VISIBLE[n].minZ=v;refresh();}
 
-/* ═══ 資訊面板 ═══ */
+/* ═══ 資訊面板 + 照片 ═══ */
 let CUR=null;
 function openInfo(id){
   CUR=POINTS.find(p=>p.id===id); if(!CUR) return;
   const p=CUR;
   document.getElementById("iPt").textContent=p.NO||"—";
   document.getElementById("iSys").textContent=p["系統"]+" · "+p["圖層"];
-  const nul=v=>`<span class="null">${v==null||v===""?"NULL":v}</span>`;
-  const val=v=>v?String(v).replace(/</g,"&lt;"):null;
+
+  const nul=()=>`<span class="null">—</span>`;
+  const val=v=>(v!=null&&v!=="") ? String(v).replace(/</g,"&lt;") : null;
   const rows=[
-    ["TYPE", "樁類",  p.TYPE],
-    ["DATE", "日期",  p.DATE],
-    ["X",    p["系統"]==="TWD67"?"X_67":"X_97",  p.X],
-    ["Y",    p["系統"]==="TWD67"?"Y_67":"Y_97",  p.Y],
-    ["WGS84","",      `${p.lat}, ${p.lng}`],
-    ["PS",   "備註",  p.PS],
-    ["TRANS","轉換",  p.TRANS_TYPE],
+    ["樁類", p.TYPE],
+    ["日期", p.DATE],
+    [p["系統"]==="TWD67"?"X_67":"X_97", p.X],
+    [p["系統"]==="TWD67"?"Y_67":"Y_97", p.Y],
+    ["WGS84", (p.lat&&p.lng)?`${p.lat}, ${p.lng}`:null],
+    ["備註",  p.PS],
+    ["轉換",  p.TRANS_TYPE],
   ];
-  let body=rows.map(([_,k,v])=>`
-    <div class="frow"><span class="k">${k||_}</span>
-    <span class="v">${val(v)??nul("NULL")}</span></div>`).join("");
+  let body=rows.map(([k,v])=>`
+    <div class="frow">
+      <span class="k">${k}</span>
+      <span class="v">${val(v)??nul()}</span>
+    </div>`).join("");
+
+  /* 照片區塊 */
+  body += `<div class="photo-section"><div class="photo-label">現場照片</div>`;
   if(p.imgs && p.imgs.length){
-    body+=`<div class="frow" style="border:none"><span class="k">照片</span></div>
-      <div class="imgs">${p.imgs.map(u=>
-        `<a href="${u}" target="_blank"><img src="${u}" onerror="this.parentNode.remove()"></a>`
-      ).join("")}</div>`;
+    body += `<div class="photo-grid">`;
+    p.imgs.forEach((u,i)=>{
+      body += `<div class="photo-item" onclick="openLb('${u}','${p.NO} — 照片${i+1}')">
+        <img src="${u}" loading="lazy"
+             onerror="this.closest('.photo-item').style.display='none'"
+             alt="照片${i+1}">
+        <div class="ph-no">照片 ${i+1}</div>
+      </div>`;
+    });
+    body += `</div>`;
+  } else {
+    body += `<div class="no-photo">此點位無現場照片紀錄</div>`;
   }
-  body+=`<div class="ilayer">圖層:${p["圖層"]} &nbsp;|&nbsp; ID:${p.id}</div>`;
+  body += `</div>`;
+
+  body += `<div class="ilayer">圖層：${p["圖層"]} &nbsp;|&nbsp; ID：${p.id}</div>`;
+
   document.getElementById("iBody").innerHTML=body;
   document.getElementById("info").classList.add("open");
   if(MARKERS[id]) MARKERS[id].setStyle({radius:9,weight:3,color:"#fff"});
@@ -374,13 +436,24 @@ function closeInfo(){
   refresh(); CUR=null;
 }
 
+/* ═══ 燈箱 ═══ */
+function openLb(url, caption){
+  document.getElementById("lbImg").src=url;
+  document.getElementById("lbInfo").textContent=caption;
+  document.getElementById("lightbox").classList.add("open");
+}
+function closeLb(){
+  document.getElementById("lightbox").classList.remove("open");
+  document.getElementById("lbImg").src="";
+}
+document.addEventListener("keydown",e=>{if(e.key==="Escape") closeLb();});
+
 /* ═══ 搜尋 ═══ */
 function searchPt(){
-  const q=document.getElementById("q").value.trim().toUpperCase();
-  if(!q) return;
+  const q=document.getElementById("q").value.trim().toUpperCase(); if(!q) return;
   const p=POINTS.find(p=>String(p.NO).toUpperCase()===q)
        ||POINTS.find(p=>String(p.NO).toUpperCase().includes(q));
-  if(!p){ toast("查無點號「"+q+"」"); return; }
+  if(!p){toast("查無點號「"+q+"」");return;}
   map.setView([p.lat,p.lng],Math.max(map.getZoom(),18));
   setTimeout(()=>openInfo(p.id),200);
 }
@@ -392,16 +465,16 @@ async function checkMeta(manual=false){
     const m=await(await fetch("/api/meta")).json();
     const dot=document.getElementById("syncDot");
     document.getElementById("syncTime").textContent=m.ts||"—";
-    if(m.err){ dot.style.background="var(--red)"; toast("資料來源錯誤:"+m.err); return; }
+    if(m.err){dot.style.background="var(--red)";toast("資料來源錯誤:"+m.err);return;}
     dot.style.background="var(--green)";
     if(m.stamp!==STAMP){
-      const first=STAMP===0; STAMP=m.stamp;
+      const first=STAMP===0;STAMP=m.stamp;
       await load();
       if(!first) toast(`QGIS 資料已更新,重載 ${m.total} 點`);
       else if(manual) toast(`最新資料:共 ${m.total} 點`);
     } else if(manual) toast(`已是最新 (${m.total} 點)`);
-  }catch(e){ document.getElementById("syncDot").style.background="var(--dim)";
-    if(manual) toast("無法連線伺服器"); }
+  }catch(e){document.getElementById("syncDot").style.background="var(--dim)";
+    if(manual) toast("無法連線伺服器");}
 }
 checkMeta();
 setInterval(checkMeta,30000);
@@ -409,8 +482,8 @@ setInterval(checkMeta,30000);
 /* ═══ 工具 ═══ */
 let tt;
 function toast(t){
-  const el=document.getElementById("toast"); el.textContent=t;
-  el.classList.add("show"); clearTimeout(tt);
+  const el=document.getElementById("toast");el.textContent=t;
+  el.classList.add("show");clearTimeout(tt);
   tt=setTimeout(()=>el.classList.remove("show"),2500);
 }
 </script>
